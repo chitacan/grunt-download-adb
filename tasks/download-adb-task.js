@@ -1,7 +1,6 @@
 'use strict'
 
 var http   = require('http')
-  , parser = require('xml2js')
 
 module.exports = function(grunt) {
   var URL  = 'http://dl-ssl.google.com/android/repository/'
