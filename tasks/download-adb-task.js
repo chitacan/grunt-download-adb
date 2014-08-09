@@ -2,10 +2,13 @@
 
 var http   = require('http')
   , xmldoc = require('xmldoc')
+  , path   = require('path')
+  , os     = require('os')
 
 module.exports = function(grunt) {
   var URL  = 'http://dl-ssl.google.com/android/repository/'
-    , REPO = 'repository-8.xml'
+    , FILE = 'repository-8.xml'
+    , PATH = path.join(os.tmpdir(), 'download-adb');
 
   var LINUX = 'linux'
     , WIN   = 'windows'
@@ -48,5 +51,10 @@ module.exports = function(grunt) {
 
   grunt.registerTask('download-adb', 'Download adb', function() {
     grunt.log.writeln('Download adb');
+    var options = this.options({
+      url      : URL,
+      file     : FILE,
+      outputDir: 'bin'
+    });
   });
 }
