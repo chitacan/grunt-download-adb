@@ -4,6 +4,7 @@ var http   = require('http')
   , xmldoc = require('xmldoc')
   , path   = require('path')
   , os     = require('os')
+  , fs     = require('fs')
 
 module.exports = function(grunt) {
   var URL  = 'http://dl-ssl.google.com/android/repository/'
@@ -47,6 +48,10 @@ module.exports = function(grunt) {
       'size'     : node.valueWithPath('sdk:size'),
       'url'      : node.valueWithPath('sdk:url')
     }
+  }
+
+  function download(url) {
+
   }
 
   grunt.registerTask('download-adb', 'Download adb', function() {
