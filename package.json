@@ -33,6 +33,7 @@
   "homepage": "https://github.com/chitacan/grunt-download-adb",
   "dependencies": {
     "grunt": "^0.4.*",
+    "progress": "^1.1.8",
     "xmldoc": "^0.1.2"
   }
 }
