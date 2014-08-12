@@ -1,15 +1,14 @@
-'use strict'
-
 var http   = require('http')
   , xmldoc = require('xmldoc')
   , path   = require('path')
   , os     = require('os')
   , fs     = require('fs')
+  , url    = require('url')
+  , Progress = require('progress')
 
 module.exports = function(grunt) {
-  var URL  = 'http://dl-ssl.google.com/android/repository/'
-    , FILE = 'repository-8.xml'
-    , PATH = path.join(os.tmpdir(), 'download-adb');
+  var URL  = 'http://dl-ssl.google.com/android/repository/repository-8.xml'
+    , TEMP = path.join(os.tmpdir(), 'download-adb');
 
   var LINUX = 'linux'
     , WIN   = 'windows'
@@ -24,17 +23,28 @@ module.exports = function(grunt) {
       return LINUX;
   }(process.platform);
 
-  function getXml(url, callback) {
-    http.get(url, function(res) {
-      var body = '';
-      res.on('data', function(chunk) {
-        body += chunk;
-      });
-      res.on('end', function() {
-        callback(undefined, body);
-      });
-    }).on('error', function(e) {
-      callback(e);
+  function getXml(res) {
+    var self = this;
+    var body = '';
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+    res.on('end', function() {
+      self.binary = extractBinaryInfo(body);
+      self.progress = new Progress(
+        '  downloading [:bar] :percent :etas',
+        {
+          total: parseInt(self.binary.size, 10),
+          complete: '=',
+          incomplete: ' ',
+          width: 20
+        }
+      );
+
+      var binUrl = url.resolve(self.url, self.binary.url);
+      http.get(binUrl, download.bind(self));
+    });
+    res.on('error', function() {
     });
   }
 
@@ -50,16 +60,49 @@ module.exports = function(grunt) {
     }
   }
 
-  function download(url) {
+  function download(res) {
+    var self = this;
+    try {
+      fs.mkdirSync(self.tempDir);
+    } catch(e) {
+    }
 
+    var tempPath = path.join(self.tempDir, self.binary.url);
+    var outputStream = fs.createWriteStream(tempPath);
+    res.pipe(outputStream);
+    res.on('data', function(chunk) {
+      self.progress.tick(chunk.length);
+    });
+    res.on('end', function() {
+      var dst = path.join(process.cwd(), self.outputDir, self.binary.url);
+      move.call(self, tempPath, dst);
+    });
+    res.on('error', function(e) {
+    });
+  }
+
+  function move(src, dst) {
+    var self = this;
+    var s = fs.createReadStream(src);
+    var d = fs.createWriteStream(dst);
+
+    s.pipe(d);
+    s.on('end', function() {
+      self.done();
+    });
+    s.on('error', function(e) {
+    });
   }
 
   grunt.registerTask('download-adb', 'Download adb', function() {
     grunt.log.writeln('Download adb');
     var options = this.options({
       url      : URL,
-      file     : FILE,
-      outputDir: 'bin'
+      outputDir: 'bin',
+      tempDir  : TEMP,
     });
+    options.done = this.async();
+
+    http.get(options.url, getXml.bind(options));
   });
 }
