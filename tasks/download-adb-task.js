@@ -4,6 +4,7 @@ var http   = require('http')
   , os     = require('os')
   , fs     = require('fs')
   , url    = require('url')
+  , unzip  = require('unzip')
   , Progress = require('progress')
 
 module.exports = function(grunt) {
@@ -71,17 +72,16 @@ module.exports = function(grunt) {
       self.progress.tick(chunk.length);
     });
     res.on('end', function() {
-      var dst = path.join(self.outputDir, self.binary.url);
-      move.call(self, tempPath, dst);
+      move.call(self, tempPath);
     });
     res.on('error', function(e) {
     });
   }
 
-  function move(src, dst) {
+  function move(src) {
     var self = this;
     var s = fs.createReadStream(src);
-    var d = fs.createWriteStream(dst);
+    var d = unzip.Extract({ path: self.outputDir });
 
     s.pipe(d);
     s.on('end', function() {
