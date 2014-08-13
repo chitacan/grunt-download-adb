@@ -63,11 +63,7 @@ module.exports = function(grunt) {
 
   function download(res) {
     var self = this;
-    try {
-      fs.mkdirSync(self.tempDir);
-    } catch(e) {
-    }
-
+    createDir(self.tempDir);
     var tempPath = path.join(self.tempDir, self.binary.url);
     var outputStream = fs.createWriteStream(tempPath);
     res.pipe(outputStream);
@@ -75,7 +71,7 @@ module.exports = function(grunt) {
       self.progress.tick(chunk.length);
     });
     res.on('end', function() {
-      var dst = path.join(process.cwd(), self.outputDir, self.binary.url);
+      var dst = path.join(self.outputDir, self.binary.url);
       move.call(self, tempPath, dst);
     });
     res.on('error', function(e) {
@@ -95,6 +91,13 @@ module.exports = function(grunt) {
     });
   }
 
+  function createDir(path) {
+    try {
+      fs.mkdirSync(path);
+    } catch(e) {
+    }
+  }
+
   grunt.registerTask('download-adb', 'Download adb', function() {
     grunt.log.writeln('Download adb');
     var options = this.options({
@@ -103,6 +106,8 @@ module.exports = function(grunt) {
       tempDir  : TEMP,
     });
     options.done = this.async();
+    options.outputDir = path.join(process.cwd(), options.outputDir);
+    createDir(options.outputDir);
 
     http.get(options.url, getXml.bind(options));
   });
