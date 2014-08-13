@@ -14,6 +14,14 @@ module.exports = function(grunt) {
     , WIN   = 'windows'
     , OSX   = 'macosx'
 
+  var PROGRESS_FMT = '  downloading [:bar] :percent :etas'
+    , PROGRESS_OPT = {
+      total: 0,
+      complete: '=',
+      incomplete: ' ',
+      width: 20
+    }
+
   var platform = function(platform) {
     if (platform === 'win32')
       return WIN;
@@ -31,15 +39,8 @@ module.exports = function(grunt) {
     });
     res.on('end', function() {
       self.binary = extractBinaryInfo(body);
-      self.progress = new Progress(
-        '  downloading [:bar] :percent :etas',
-        {
-          total: parseInt(self.binary.size, 10),
-          complete: '=',
-          incomplete: ' ',
-          width: 20
-        }
-      );
+      PROGRESS_OPT.total = parseInt(self.binary.size, 10),
+      self.progress = new Progress(PROGRESS_FMT, PROGRESS_OPT);
 
       var binUrl = url.resolve(self.url, self.binary.url);
       http.get(binUrl, download.bind(self));
