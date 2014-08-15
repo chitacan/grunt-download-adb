@@ -1,8 +1,5 @@
 grunt-download-adb
 ==================
 
-grunt task for download adb binaries.
+Grunt task for download `adb` for your platform.
 
-repo info
-------------------
-http://dl-ssl.google.com/android/repository/repository-8.xml
