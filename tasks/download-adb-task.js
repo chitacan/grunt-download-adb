@@ -42,9 +42,14 @@ module.exports = function(grunt) {
       self.binary = extractBinaryInfo(body);
       PROGRESS_OPT.total = parseInt(self.binary.size, 10),
       self.progress = new Progress(PROGRESS_FMT, PROGRESS_OPT);
+      self.tempPath = path.join(self.tempDir, self.binary.url);
 
-      var binUrl = url.resolve(self.url, self.binary.url);
-      http.get(binUrl, download.bind(self));
+      if (grunt.file.exists(self.tempPath)) {
+        extract.call(self);
+      } else {
+        var binUrl = url.resolve(self.url, self.binary.url);
+        http.get(binUrl, download.bind(self));
+      }
     });
     res.on('error', function() {
     });
@@ -65,22 +70,21 @@ module.exports = function(grunt) {
   function download(res) {
     var self = this;
     createDir(self.tempDir);
-    var tempPath = path.join(self.tempDir, self.binary.url);
-    var outputStream = fs.createWriteStream(tempPath);
+    var outputStream = fs.createWriteStream(self.tempPath);
     res.pipe(outputStream);
     res.on('data', function(chunk) {
       self.progress.tick(chunk.length);
     });
     res.on('end', function() {
-      move.call(self, tempPath);
+      extract.call(self);
     });
     res.on('error', function(e) {
     });
   }
 
-  function move(src) {
+  function extract() {
     var self = this;
-    var s = fs.createReadStream(src);
+    var s = fs.createReadStream(self.tempPath);
     var d = unzip.Extract({ path: self.outputDir });
 
     s.pipe(d);
@@ -92,10 +96,7 @@ module.exports = function(grunt) {
   }
 
   function createDir(path) {
-    try {
-      fs.mkdirSync(path);
-    } catch(e) {
-    }
+    grunt.file.mkdir(path);
   }
 
   grunt.registerTask('download-adb', 'Download adb', function() {
