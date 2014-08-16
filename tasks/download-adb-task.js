@@ -89,6 +89,10 @@ module.exports = function(grunt) {
 
     s.pipe(d);
     s.on('end', function() {
+      if (platform != 'win32') {
+        var adbPath = grunt.file.expand(path.join(self.outputDir, '**', 'adb'));
+        fs.chmodSync(adbPath[0], '755');
+      }
       self.done();
     });
     s.on('error', function(e) {
