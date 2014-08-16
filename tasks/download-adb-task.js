@@ -1,10 +1,10 @@
-var http   = require('http')
-  , xmldoc = require('xmldoc')
-  , path   = require('path')
-  , os     = require('os')
-  , fs     = require('fs')
-  , url    = require('url')
-  , unzip  = require('unzip')
+var http     = require('http')
+  , xmldoc   = require('xmldoc')
+  , path     = require('path')
+  , os       = require('os')
+  , fs       = require('fs')
+  , url      = require('url')
+  , unzip    = require('unzip')
   , Progress = require('progress')
 
 module.exports = function(grunt) {
@@ -17,10 +17,10 @@ module.exports = function(grunt) {
 
   var PROGRESS_FMT = '  downloading [:bar] :percent :etas'
     , PROGRESS_OPT = {
-      total: 0,
-      complete: '=',
-      incomplete: ' ',
-      width: 20
+      total      : 0,
+      complete   : '=',
+      incomplete : ' ',
+      width      : 20
     }
 
   var platform = function(platform) {
