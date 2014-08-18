@@ -51,7 +51,8 @@ module.exports = function(grunt) {
         http.get(binUrl, download.bind(self));
       }
     });
-    res.on('error', function() {
+    res.on('error', function(e) {
+      self.done(e);
     });
   }
 
@@ -79,6 +80,7 @@ module.exports = function(grunt) {
       extract.call(self);
     });
     res.on('error', function(e) {
+      self.done(e);
     });
   }
 
@@ -96,6 +98,7 @@ module.exports = function(grunt) {
       self.done();
     });
     s.on('error', function(e) {
+      self.done(e);
     });
   }
 
